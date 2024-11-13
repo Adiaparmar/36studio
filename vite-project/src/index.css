@@ -5,3 +5,7 @@
 body {
   background-color: black;
 }
+
+canvas {
+  pointer-events: none;
+}
