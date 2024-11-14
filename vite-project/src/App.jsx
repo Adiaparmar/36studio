@@ -5,27 +5,63 @@ import data from "./data";
 import LocomotiveScroll from "locomotive-scroll";
 import { useEffect, useRef, useState } from "react";
 import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
 
 function App() {
   const [showCanvas, setShowCanvas] = useState(false);
   const headingref = useRef(null);
   const growingSpan = useRef(null);
-  const locomotiveScroll = new LocomotiveScroll({}, []);
+
+  useEffect(() => {
+    const locomotiveScroll = new LocomotiveScroll();
+  }, []);
 
   useGSAP(() => {
-    const locomotiveScroll = new LocomotiveScroll({}, []);
-    headingref.current.addEventListener("click", () => {
+    headingref.current.addEventListener("click", (e) => {
       setShowCanvas(!showCanvas);
+      if (!showCanvas) {
+        if (growingSpan.current) {
+          gsap.set(growingSpan.current, {
+            top: e.clientY,
+            left: e.clientX,
+          });
+          gsap.set("body", {
+            backgroundColor: "#fd2c2a",
+            color: "#000",
+          }),
+            gsap.to(growingSpan.current, {
+              scale: 1000,
+              duration: 1,
+              ease: "power4.inOut",
+              onComplete: () => {
+                gsap.set(growingSpan.current, {
+                  scale: 0,
+                  clearProps: "all",
+                });
+              },
+            });
+        }
+      } else {
+        gsap.set("body", {
+          color: "#fff",
+          backgroundColor: "#000",
+        });
+      }
     });
   }, [showCanvas]);
+
   return (
     <div>
+      <span
+        ref={growingSpan}
+        className="growing rounded-full block fixed top-[-20%] left-[-20%] w-4 h-4"
+      ></span>
       <div className="w-full min-h-screen relative font-['JetBrains_Mono ']">
         {showCanvas &&
           data[0].map((canvasdets, index) => (
             <Canvas key={index} details={canvasdets} />
           ))}
-        <div className="w-full h-screen z-[1] text-white relative">
+        <div className="w-full h-screen z-[1]  relative">
           <nav className=" w-full p-8 flex justify-between z-50">
             <div className="brand text-2xl font-regular">thirtysixstudios</div>
             <div className="links flex gap-10">
@@ -66,10 +102,11 @@ function App() {
           </div>
         </div>
       </div>
-      <div className="w-full h-screen z-[1] relative text-white mt-40 ml-[3%]">
-        {data[1].map((canvasdets, index) => (
-          <Canvas key={index} details={canvasdets} />
-        ))}
+      <div className="w-full h-screen z-[1] relative mt-40 ml-[3%]">
+        {showCanvas &&
+          data[0].map((canvasdets, index) => (
+            <Canvas key={index} details={canvasdets} />
+          ))}
         <div className="relative z-[1]">
           <h1 className="text-8xl tracking-tight">About the Brand</h1>
           <p className="text-4xl mt-10 leading-[1.8] font-light w-[80%]">
